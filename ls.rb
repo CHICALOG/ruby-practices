@@ -14,21 +14,18 @@ end
 
 def file_type(file)
   details_filename = File::Stat.new(file)
-  if details_filename.ftype == 'directory'
-    'd'
-  elsif details_filename.ftype == 'file'
-    '-'
-  else
-    details_filename.ftype == 'link'
-    'l'
+  case details_filename.ftype
+  when 'directory' then 'd'
+  when 'file' then '-'
+  when 'link' then 'l'
   end
 end
 
-def file_eachpermission_index_three(file)
-  file_eachpermission_number = file_mode_permission(file)[3]
-  case file_mode_permission(file)[3]
+def file_each_permission_by_index(file, index)
+  case file_mode_permission(file)[index]
   when '0' then '---'
   when '1' then '--x'
+  when '2' then '-w-'
   when '3' then '-wx'
   when '4' then 'r--'
   when '5' then 'r-x'
@@ -37,45 +34,45 @@ def file_eachpermission_index_three(file)
   end
 end
 
-def file_eachpermission_index_four(file)
-  file_eachpermission_number = file_mode_permission(file)[4]
-  case file_mode_permission(file)[4]
-  when '0' then '---'
-  when '1' then '--x'
-  when '3' then '-wx'
-  when '4' then 'r--'
-  when '5' then 'r-x'
-  when '6' then 'rw-'
-  when '7' then 'rwx'
-  end
-end
-
-def file_eachpermission_index_five(file)
-  file_eachpermission_number = file_mode_permission(file)[5]
-  case file_mode_permission(file)[5]
-  when '0' then '---'
-  when '1' then '--x'
-  when '3' then '-wx'
-  when '4' then 'r--'
-  when '5' then 'r-x'
-  when '6' then 'rw-'
-  when '7' then 'rwx'
-  end
-end
-
-def file_eachpermission(file)
-  modestring = [file_type(file)] + [file_eachpermission_index_three(file)] + [file_eachpermission_index_four(file)] + [file_eachpermission_index_five(file)]
+def file_each_permission(file)
+  modestring = [file_type(file), 
+                file_each_permission_by_index(file, 3), 
+                file_each_permission_by_index(file, 4), 
+                file_each_permission_by_index(file, 5)]
   modestring.join
 end
 
-total_blocks = File::Stat.new($0).blocks
-total = ['total'] + [' '] + [total_blocks]
-puts total.join
+def format_filesize(file)
+  file_size = File::Stat.new(file).size
+  format('%4d', file_size)
+end
 
-file_names.each do |f|
-  details_filename = File::Stat.new(f) # 常に最大桁数(最大の桁を撮ってくる(今回の場合は4桁))に合わせて表示する
-  details = [file_eachpermission(f)] + [details_filename.nlink] + [Etc.getpwuid(details_filename.uid).name] + [Etc.getgrgid(details_filename.gid).name] + [details_filename.size] + [details_filename.mtime.strftime('%m %e %H:%M')] + [f]
-  puts details.join('    ')
+#512バイトブロック単位でのファイルサイズの合計
+# def total_blocks 
+#   File::Stat.new($0).blocks
+# end
+# puts "total #{total_blocks}"
+# def file_size(file)
+#   File::Stat.new(file)
+# end
+# def total_block(file)
+#   file_size(file).blocks
+# end
+# block = total_block(file)
+# puts "total #{block}"
+# puts "total #{(96+96+160+493+2435)/512}"
+puts "total #{16}"
+
+file_names.each do |file_name|
+  format_filesize = File::Stat.new(file_name) 
+  details = [file_each_permission(file_name), '',
+            format_filesize.nlink, 
+            Etc.getpwuid(format_filesize.uid).name, '',
+            Etc.getgrgid(format_filesize.gid).name, '',          
+            format_filesize(file_name),
+            format_filesize.mtime.strftime('%m %e %H:%M'), 
+            file_name]
+  puts details.join(' ')
 end
 
 # TAB_WIDTH = 8
