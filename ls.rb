@@ -47,21 +47,12 @@ def format_filesize(file)
   format('%4d', file_size)
 end
 
-#512バイトブロック単位でのファイルサイズの合計
-# def total_blocks 
-#   File::Stat.new($0).blocks
-# end
-# puts "total #{total_blocks}"
-# def file_size(file)
-#   File::Stat.new(file)
-# end
-# def total_block(file)
-#   file_size(file).blocks
-# end
-# block = total_block(file)
-# puts "total #{block}"
-# puts "total #{(96+96+160+493+2435)/512}"
-puts "total #{16}"
+total = 0
+file_names.each do |file_name|
+  file_stat = File::Stat.new(file_name)
+  total += file_stat.blocks
+end
+puts "total #{total}"
 
 file_names.each do |file_name|
   format_filesize = File::Stat.new(file_name) 
