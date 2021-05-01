@@ -7,22 +7,21 @@ def file_names
   Dir.glob('*').sort
 end
 
-def file_mode_permission(file)
-  eight_ary = File::Stat.new(file).mode.to_s(8)
-  alignment = format('%06d', eight_ary)
+def octal_permission(file)
+  octal_mode = File::Stat.new(file).mode.to_s(8)
+  octal_mode[-3..]
 end
 
 def file_type(file)
-  details_filename = File::Stat.new(file)
-  case details_filename.ftype
+  case File::Stat.new(file).ftype
   when 'directory' then 'd'
   when 'file' then '-'
   when 'link' then 'l'
   end
 end
 
-def file_each_permission_by_index(file, index)
-  case file_mode_permission(file)[index]
+def permission_by_index(file, index)
+  case octal_permission(file)[index]
   when '0' then '---'
   when '1' then '--x'
   when '2' then '-w-'
@@ -34,15 +33,14 @@ def file_each_permission_by_index(file, index)
   end
 end
 
-def file_each_permission(file)
-  modestring = [file_type(file), 
-                file_each_permission_by_index(file, 3), 
-                file_each_permission_by_index(file, 4), 
-                file_each_permission_by_index(file, 5)]
-  modestring.join
+def type_and_permission(file)
+  file_type(file) +
+    permission_by_index(file, 0) +
+    permission_by_index(file, 1) +
+    permission_by_index(file, 2)
 end
 
-def format_filesize(file)
+def file_stat(file)
   file_size = File::Stat.new(file).size
   format('%4d', file_size)
 end
@@ -55,15 +53,15 @@ end
 puts "total #{total}"
 
 file_names.each do |file_name|
-  format_filesize = File::Stat.new(file_name) 
-  details = [file_each_permission(file_name), '',
-            format_filesize.nlink, 
-            Etc.getpwuid(format_filesize.uid).name, '',
-            Etc.getgrgid(format_filesize.gid).name, '',          
-            format_filesize(file_name),
-            format_filesize.mtime.strftime('%m %e %H:%M'), 
-            file_name]
-  puts details.join(' ')
+  file_stat = File::Stat.new(file_name)
+  details = "#{type_and_permission(file_name)} " \
+            "#{file_stat.nlink} " \
+            "#{Etc.getpwuid(file_stat.uid).name} " \
+            "#{Etc.getgrgid(file_stat.gid).name} " \
+            "#{file_stat(file_name)} " \
+            "#{file_stat.mtime.strftime('%m %e %H:%M')} " \
+            "#{file_name} "
+  puts details
 end
 
 # TAB_WIDTH = 8
