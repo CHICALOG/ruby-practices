@@ -9,7 +9,7 @@ end
 
 def octal_permission(file)
   octal_mode = File::Stat.new(file).mode.to_s(8)
-  octal_mode[-3..]
+  octal_mode[-3..-1]
 end
 
 def file_type(file)
