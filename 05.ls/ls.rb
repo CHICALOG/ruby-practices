@@ -72,7 +72,7 @@ def ls_command_with_l_option(file_names)
               "#{Etc.getpwuid(file_stat.uid).name} " \
               "#{Etc.getgrgid(file_stat.gid).name} " \
               "#{format_filesize(file_name)} " \
-              "#{file_stat.mtime.strftime('%m %e %H:%M')} " \
+              "#{file_stat.mtime.strftime('%m %d %H:%M')} " \
               "#{file_name} "
     puts details
   end
