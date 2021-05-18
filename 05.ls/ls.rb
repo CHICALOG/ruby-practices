@@ -89,6 +89,7 @@ def file_type(file)
 end
 
 def permission_by_index(file, index)
+
   type = ocal_permission(file)[index]
   LOCAL_PERMISSION[type]
 end
