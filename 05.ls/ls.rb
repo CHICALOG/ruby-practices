@@ -13,7 +13,7 @@ FILE_TYPE = {
   'link' => 'l'
 }.freeze
 
-LOCAL_PERMISSION = {
+PERMISSION_TABLE = {
   '0' => '---',
   '1' => '--x',
   '2' => '-w-',
@@ -27,11 +27,12 @@ LOCAL_PERMISSION = {
 def main
   opt = ARGV.getopts('a', 'r', 'l')
 
-  file_names = if opt['a']
-                 Dir.glob('*', File::FNM_DOTMATCH).sort
-               else
-                 Dir.glob('*').sort
-               end
+  file_names = 
+    if opt['a']
+      Dir.glob('*', File::FNM_DOTMATCH).sort
+    else
+      Dir.glob('*').sort
+    end
 
   file_names = file_names.reverse if opt['r']
 
@@ -78,7 +79,7 @@ def ls_command_with_l_option(file_names)
   end
 end
 
-def ocal_permission(file)
+def octal_permission(file)
   octal_mode = File::Stat.new(file).mode.to_s(8)
   octal_mode[-3..]
 end
@@ -89,9 +90,8 @@ def file_type(file)
 end
 
 def permission_by_index(file, index)
-
-  type = ocal_permission(file)[index]
-  LOCAL_PERMISSION[type]
+  type = octal_permission(file)[index]
+  PERMISSION_TABLE[type]
 end
 
 def type_and_permission(file)
